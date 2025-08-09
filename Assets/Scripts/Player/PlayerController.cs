@@ -16,7 +16,7 @@ public class PlayerController : MonoBehaviour
     public Transform firePointDown;
     public Transform firePointLeft;
     public Transform firePointRight;
-
+    public float timeDuration;
     private Rigidbody2D rb;
     private Vector2 movement;
     private float nextFireTime;
@@ -147,7 +147,7 @@ public class PlayerController : MonoBehaviour
             WeaponPickup pickup = collision.GetComponent<WeaponPickup>();
             if (pickup != null)
             {
-                SetWeapon(pickup.weaponPrefab, 60f);  // Передаем префаб и длительность
+                SetWeapon(pickup.weaponPrefab, timeDuration);  // Передаем префаб и длительность
                 Destroy(collision.gameObject);
             }
         }

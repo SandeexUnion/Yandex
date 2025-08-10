@@ -1,5 +1,6 @@
-using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
@@ -10,6 +11,7 @@ public class PlayerController : MonoBehaviour
     public GameObject pistolPrefab;
 
     [Header("Fire Points")]
+    public List<Transform> firePoints = new List<Transform>(); // Добавляем список
     public Transform firePointUp;
     public Transform firePointDown;
     public Transform firePointLeft;
@@ -37,6 +39,9 @@ public class PlayerController : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
         rb.isKinematic = true;
+
+        // Инициализируем список firePoints
+        firePoints = new List<Transform> { firePointRight, firePointUp, firePointLeft, firePointDown };
         currentFirePoint = firePointRight;
 
         // Устанавливаем пистолет как оружие по умолчанию
@@ -84,7 +89,8 @@ public class PlayerController : MonoBehaviour
         // Добавляем новое оружие
         GameObject weaponObject = Instantiate(weaponPrefab);
         weaponObject.transform.SetParent(transform); // Важно: делаем оружие дочерним объектом игрока, чтобы оно двигалось вместе с ним
-        weaponObject.transform.localPosition = Vector3.zero; //  Устанавливаем позицию относительно игрока
+        weaponObject.gameObject.GetComponent<SpriteRenderer>().enabled = false;
+        //weaponObject.transform.localPosition = Vector3.zero; //  Устанавливаем позицию относительно игрока
 
         currentWeapon = weaponObject.GetComponent<IWeapon>();
 
@@ -184,5 +190,7 @@ public class PlayerController : MonoBehaviour
                 Destroy(collision.gameObject);
             }
         }
+
+        
     }
 }

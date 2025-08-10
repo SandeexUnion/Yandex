@@ -18,7 +18,7 @@ GameObject:
   - component: {fileID: 8971489435868188235}
   - component: {fileID: 4689594724167133661}
   m_Layer: 0
-  m_Name: NPC
+  m_Name: FatZombie
   m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -194,10 +194,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1ddf55b4da26e864a88c56a438d1e4bd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 3
+  moveSpeed: 2.2
   stoppingDistance: 0
-  attackRange: 1.5
+  attackRange: 0.5
   damagePerSecond: 1
+  HP: 2
   attackCooldown: 1
 --- !u!212 &915869673920051393
 SpriteRenderer:

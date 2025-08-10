@@ -60,8 +60,9 @@ public class PlayerHealth : MonoBehaviour
         GetComponent<PlayerController>().enabled = true;
     }
 
-    public int GetHealth()
+    public void GetHealth()
     {
-        return currentHealth;
+        maxHealth++;
+        currentHealth++;
     }
 }

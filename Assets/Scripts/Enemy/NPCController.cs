@@ -7,6 +7,7 @@ public class NPCController : MonoBehaviour
     public float stoppingDistance = 0.5f;
     public float attackRange = 1.5f; // Дальность атаки
     public int damagePerSecond = 1; // Урон в секунду
+    [SerializeField] int HP;
 
     private Transform player;
     private AIPath ai;
@@ -80,16 +81,22 @@ public class NPCController : MonoBehaviour
             animator.SetFloat("Speed", ai.velocity.magnitude);
         }
     }
-    public virtual void TakeDamage()
+    public virtual void TakeDamage(int damage)
+    {
+        HP-=damage;
+        if(HP <= 0)
+        {
+            Die();
+        }
+    }
+
+    public virtual void Die()
     {
         ScoreManager.Instance.AddScore(1); // Добавляем 1 очко за убийство
         Destroy(gameObject);
     }
 
-    private void FixedUpdate()
-    {
-        // Больше не нужно перемещать rb.MovePosition здесь, AILerp делает это за нас
-    }
+    
 
     private void Attack()
     {

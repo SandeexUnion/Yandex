@@ -10,9 +10,12 @@ public class PlayerHealth : MonoBehaviour
 
     public event System.Action OnDeath;
 
+    private PlayerController playerController;
+
     private void Start()
     {
         currentHealth = maxHealth;
+        playerController = GetComponent<PlayerController>();
     }
 
     public void TakeDamage(int damageAmount)
@@ -21,6 +24,10 @@ public class PlayerHealth : MonoBehaviour
         {
             lastDamageTime = Time.time;
             currentHealth -= damageAmount;
+
+            // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
+            playerController.PlayHurtAnimation();
+
             Debug.Log("Player Health: " + currentHealth);
 
             if (currentHealth <= 0)
@@ -33,17 +40,24 @@ public class PlayerHealth : MonoBehaviour
     private void Die()
     {
         Debug.Log("Player died!");
+
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
+        playerController.PlayDeathAnimation();
+
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+        GetComponent<PlayerController>().enabled = false;
+        GetComponent<Rigidbody2D>().linearVelocity = Vector2.zero;
+
         if (OnDeath != null)
         {
             OnDeath();
         }
-
-        // Не деактивируем игрока сразу, это сделает DeathScreenManager
     }
 
     public void ResetHealth()
     {
         currentHealth = maxHealth;
+        GetComponent<PlayerController>().enabled = true;
     }
 
     public int GetHealth()

@@ -1,4 +1,6 @@
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UI;
 
 public abstract class Weapon : MonoBehaviour, IWeapon
 {
@@ -51,7 +53,7 @@ public abstract class Weapon : MonoBehaviour, IWeapon
     {
         if (muzzleFlashPrefab != null)
         {
-            GameObject muzzleFlash = Instantiate(muzzleFlashPrefab, firePoint.position, firePoint.rotation);
+            GameObject muzzleFlash = Instantiate(muzzleFlashPrefab.gameObject, firePoint.position, firePoint.rotation);
             Destroy(muzzleFlash, 0.1f); // Время жизни вспышки
         }
     }

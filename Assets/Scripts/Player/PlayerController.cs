@@ -7,9 +7,7 @@ public class PlayerController : MonoBehaviour
     public float moveSpeed = 5f;
 
     [Header("Default Weapon - Pistol")]
-    public GameObject pistolPrefab; // Ссылка на префаб пистолета
-
-    private IWeapon currentWeapon; // Текущее оружие
+    public GameObject pistolPrefab;
 
     [Header("Fire Points")]
     public Transform firePointUp;
@@ -17,11 +15,23 @@ public class PlayerController : MonoBehaviour
     public Transform firePointLeft;
     public Transform firePointRight;
     public float timeDuration;
+
+    [Header("Animation")]
+    public Animator animator;
+    public float animationSmoothing = 0.1f;
+
+    private IWeapon currentWeapon;
     private Rigidbody2D rb;
     private Vector2 movement;
     private float nextFireTime;
     private Transform currentFirePoint;
     private Coroutine weaponSwitchCoroutine;
+    private Vector2 lastDirection = Vector2.right;
+    private static readonly int MoveX = Animator.StringToHash("MoveX");
+    private static readonly int MoveY = Animator.StringToHash("MoveY");
+    private static readonly int Speed = Animator.StringToHash("Speed");
+    private static readonly int Hurt = Animator.StringToHash("Hurt");
+    private static readonly int Die = Animator.StringToHash("Die");
 
     private void Awake()
     {
@@ -37,6 +47,29 @@ public class PlayerController : MonoBehaviour
     {
         HandleMovementInput();
         HandleShootingInput();
+        UpdateAnimations();
+    }
+    private void UpdateAnimations()
+    {
+        if (movement.magnitude > 0.1f)
+        {
+            lastDirection = movement.normalized;
+        }
+
+        // Плавное изменение параметров анимации
+        animator.SetFloat(MoveX, lastDirection.x, animationSmoothing, Time.deltaTime);
+        animator.SetFloat(MoveY, lastDirection.y, animationSmoothing, Time.deltaTime);
+        animator.SetFloat(Speed, movement.magnitude);
+    }
+
+    public void PlayHurtAnimation()
+    {
+        animator.SetTrigger(Hurt);
+    }
+
+    public void PlayDeathAnimation()
+    {
+        animator.SetTrigger(Die);
     }
 
     // Установка нового оружия

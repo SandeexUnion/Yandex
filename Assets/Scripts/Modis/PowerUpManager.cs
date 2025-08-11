@@ -62,13 +62,13 @@ public class PowerUpManager : MonoBehaviour
     // 4. Дробовик
     public void ActivateShotgun()
     {
-        player.SetWeapon(shotgunPrefab, 60f);
+        player.SetWeapon(shotgunPrefab, 15f);
     }
 
     // 5. Пулемет
     public void ActivateMachinegun()
     {
-        player.SetWeapon(machinegunPrefab, 60f);
+        player.SetWeapon(machinegunPrefab, 1f);
         //weapon.GetComponent<Weapon>().fireRate = 0.1f;
     }
 

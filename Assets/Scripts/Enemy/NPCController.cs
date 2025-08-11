@@ -1,5 +1,6 @@
 using UnityEngine;
 using Pathfinding;
+using System; // Добавляем для Action
 
 public class NPCController : MonoBehaviour
 {
@@ -7,17 +8,17 @@ public class NPCController : MonoBehaviour
     public float stoppingDistance = 0.5f;
     public float attackRange = 1.5f; // Дальность атаки
     public int damagePerSecond = 1; // Урон в секунду
-    [SerializeField] int HP;
-
-    private Transform player;
+    [SerializeField] int HP; private Transform player;
     private AIPath ai;
     private AILerp aiLerp;
     private Animator animator;
     private Rigidbody2D rb;
     private PlayerHealth playerHealth; // Ссылка на PlayerHealth
-
+    private bool isDead = false;
     private float lastAttackTime; // Время последней атаки
     public float attackCooldown = 1f; // Задержка между атаками
+
+    public event Action OnDeath; // Событие смерти
 
     private void Start()
     {
@@ -81,22 +82,29 @@ public class NPCController : MonoBehaviour
             animator.SetFloat("Speed", ai.velocity.magnitude);
         }
     }
-    public virtual void TakeDamage(int damage)
+    public void TakeDamage(int damage)
     {
-        HP-=damage;
-        if(HP <= 0)
+        // ... (ваш код получения урона)
+
+        if (HP <= 0 && !isDead) // Проверяем флаг!
         {
+            isDead = true; // Устанавливаем флаг
             Die();
+        }
+        else
+        {
+            HP--;
         }
     }
 
-    public virtual void Die()
+    public void Die()
     {
-        ScoreManager.Instance.AddScore(1); // Добавляем 1 очко за убийство
+        // ... (ваш код смерти)
+        OnDeath?.Invoke(); // Вызываем событие
         Destroy(gameObject);
     }
 
-    
+
 
     private void Attack()
     {
@@ -109,4 +117,5 @@ public class NPCController : MonoBehaviour
             }
         }
     }
+
 }

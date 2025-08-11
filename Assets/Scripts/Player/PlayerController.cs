@@ -11,12 +11,12 @@ public class PlayerController : MonoBehaviour
     public GameObject pistolPrefab;
 
     [Header("Fire Points")]
-    public List<Transform> firePoints = new List<Transform>(); // Добавляем список
+    public List<Transform> firePoints = new List<Transform>();
     public Transform firePointUp;
     public Transform firePointDown;
     public Transform firePointLeft;
     public Transform firePointRight;
-    public float timeDuration;
+    public float timeDuration = 60;
 
     [Header("Animation")]
     public Animator animator;
@@ -35,10 +35,19 @@ public class PlayerController : MonoBehaviour
     private static readonly int Hurt = Animator.StringToHash("Hurt");
     private static readonly int Die = Animator.StringToHash("Die");
 
+    private SpriteRenderer spriteRenderer;  // Ссылка на SpriteRenderer
+
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
         rb.isKinematic = true;
+
+        // Получаем SpriteRenderer
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        if (spriteRenderer == null)
+        {
+            Debug.LogError("SpriteRenderer not found on PlayerController!");
+        }
 
         // Инициализируем список firePoints
         firePoints = new List<Transform> { firePointRight, firePointUp, firePointLeft, firePointDown };
@@ -53,7 +62,23 @@ public class PlayerController : MonoBehaviour
         HandleMovementInput();
         HandleShootingInput();
         UpdateAnimations();
+        HandleSpriteFlipping(); // Добавляем функцию для поворота спрайта
     }
+
+    private void HandleSpriteFlipping()
+    {
+        // Отражаем спрайт по горизонтали в зависимости от направления движения
+        if (movement.x > 0)
+        {
+            spriteRenderer.flipX = false; // Смотрим вправо
+        }
+        else if (movement.x < 0)
+        {
+            spriteRenderer.flipX = true; // Смотрим влево
+        }
+        // Если movement.x == 0, не меняем flipX, чтобы персонаж смотрел в последнюю сторону
+    }
+
     private void UpdateAnimations()
     {
         if (movement.magnitude > 0.1f)
@@ -78,7 +103,7 @@ public class PlayerController : MonoBehaviour
     }
 
     // Установка нового оружия
-    public void SetWeapon(GameObject weaponPrefab, float duration = 0f)
+    public void SetWeapon(GameObject weaponPrefab, float duration = 60f)
     {
         // Удаляем текущее оружие, если оно есть
         if (currentWeapon != null)
@@ -90,7 +115,7 @@ public class PlayerController : MonoBehaviour
         GameObject weaponObject = Instantiate(weaponPrefab);
         weaponObject.transform.SetParent(transform); // Важно: делаем оружие дочерним объектом игрока, чтобы оно двигалось вместе с ним
         weaponObject.gameObject.GetComponent<SpriteRenderer>().enabled = false;
-        //weaponObject.transform.localPosition = Vector3.zero; //  Устанавливаем позицию относительно игрока
+        weaponObject.transform.localPosition = Vector3.zero; //  Устанавливаем позицию относительно игрока
 
         currentWeapon = weaponObject.GetComponent<IWeapon>();
 
@@ -190,7 +215,5 @@ public class PlayerController : MonoBehaviour
                 Destroy(collision.gameObject);
             }
         }
-
-        
     }
 }

@@ -7,6 +7,7 @@ TagManager:
   - Enemy
   - Ground
   - WeaponPickup
+  - Obstacle
   layers:
   - Default
   - TransparentFX

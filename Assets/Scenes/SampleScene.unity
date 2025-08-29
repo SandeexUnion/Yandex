@@ -2227,7 +2227,7 @@ Camera:
     y: 0
     width: 1
     height: 1
-  near clip plane: 0.3
+  near clip plane: 0
   far clip plane: 1000
   field of view: 34
   orthographic: 1
@@ -3968,6 +3968,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: A*
       objectReference: {fileID: 0}
+    - target: {fileID: 7645286198122241656, guid: f6ae8c5784651aa4eb88ed52b42628e8, type: 3}
+      propertyPath: data.dataString
+      value: UEsDBBQAAAgIAAAYIeyy0nRRWAIAAAsFAAALACQAZ3JhcGgwLmpzb24KACAAAAAAAAEAGAAAgD7V3rGdAQCAPtXesZ0BAIA+1d6xnQF1VEtz2jAQ/iuMzqVjQ0JCby0kpIcEJqSTiy9CWmMNsuTRg0cy/PeuZBs7dHry+ttvd7992J9EKFsBc9osjODPmgP5MSDBJt8GnfMJjnSr1Vp8QMt5F9wVgUQj55U6oRFPQ5jVJTgj2E+1lYGcIOiVyLUpH/gWZto6i3BOpQV0Ge1CtELoc0CO+BhOQ8gJrdFdsD7QmiaDM5oMlAPTUVtiS6tZXjFJywp4kNyR00nDTieRprCZhhGEMy2lsI0S4k5V7PSVnkKfXFDsKpYO3ALEtnBBYT9wmecWXCPH0NNcGBxOnZH80vXESmp3taY9lT7UmNxEOXXO53/cdU+50eVTWzVNQgVXCLZDfYxa1xtoH55/le3Vgcod3Uh4L0C96IXRXnF0OuNDqLcwmnevl8ZmBbBdh9dKr0Bf/X8tw3RwPsfejzMpyk1wfb+pgbXUcdJx6WBwJ79RcDwJ26RANKj4Y+GNbvu30zgehbEOXU2XKsjbaG8ClTyiEebOvJtpoyCijeYKFJXutMIs7np/V75e1SvPIw0fSVO78bW3fxUS4Y6fJFeulT5cdmULfXgGWyy9k0JBJzo4XnBMM61UfV79kbRha29yynphWy/418MiN0kObDqe3I7p+DafjodpPsrv7ukmpfmY3iecxNMTCvukclULbcaDS1NdcoVn1v47BgtDq3jq3NDDQnyUujdyoXK9ZgZALesMF+FgsAh+jvyBCxzQGpwTKq6bfGZEarYDnl0SZbHTh6MzNOuyZKQSe+0CkpFZ/FlkJMCXU14Z2As4hOJtsjM5/wVQSwMEFAAACAgAABgh7B+ViORtAAAAeAAAAAkAJABtZXRhLmpzb24KACAAAAAAAAEAGAAAgD7V3rGdAQCAPtXesZ0BAIA+1d6xnQGrVipLLSrOzM9TslIw0TPSMzTXUVBKL0osyCgGihiCOKWZKSB2tJKJQVpqsqWxmalxorFpmqWxrmGaUZq5RWKSYWKacaKFQYpSLFB9SWVBql9ibipET0BiSUZaZl5KZl66nntRZoo7yGil2FoAUEsBAi0AFAAACAgAABgh7LLSdFFYAgAACwUAAAsAJAAAAAAAAAAAAAAAAAAAAGdyYXBoMC5qc29uCgAgAAAAAAABABgAAIA+1d6xnQEAgD7V3rGdAQCAPtXesZ0BUEsBAi0AFAAACAgAABgh7B+ViORtAAAAeAAAAAkAJAAAAAAAAAAAAAAApQIAAG1ldGEuanNvbgoAIAAAAAAAAQAYAACAPtXesZ0BAIA+1d6xnQEAgD7V3rGdAVBLBQYAAAAAAgACALgAAABdAwAAAAA=
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -4120,7 +4124,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 221693487657909221, guid: 0991bad838b19564399d509b5c4f5231, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 2
+      value: -14.27
       objectReference: {fileID: 0}
     - target: {fileID: 221693487657909221, guid: 0991bad838b19564399d509b5c4f5231, type: 3}
       propertyPath: m_LocalPosition.y
@@ -4224,6 +4228,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5613466582114047619, guid: b56af9f1b036f6a4e9862fe7d3d8eb8e, type: 3}
+      propertyPath: tilemap
+      value: 
+      objectReference: {fileID: 344559930}
+    - target: {fileID: 5613466582114047619, guid: b56af9f1b036f6a4e9862fe7d3d8eb8e, type: 3}
       propertyPath: waveInfoText
       value: 
       objectReference: {fileID: 2034498571}
@@ -4244,6 +4252,10 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5613466582114047619, guid: b56af9f1b036f6a4e9862fe7d3d8eb8e, type: 3}
+      propertyPath: obstaclePrefabs.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5613466582114047619, guid: b56af9f1b036f6a4e9862fe7d3d8eb8e, type: 3}
       propertyPath: waves.Array.data[0].waveName
       value: 1
       objectReference: {fileID: 0}
@@ -4251,6 +4263,10 @@ PrefabInstance:
       propertyPath: waves.Array.data[1].waveName
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 5613466582114047619, guid: b56af9f1b036f6a4e9862fe7d3d8eb8e, type: 3}
+      propertyPath: 'obstaclePrefabs.Array.data[0]'
+      value: 
+      objectReference: {fileID: 6189168690799200897, guid: 0991bad838b19564399d509b5c4f5231, type: 3}
     - target: {fileID: 5613466582114047619, guid: b56af9f1b036f6a4e9862fe7d3d8eb8e, type: 3}
       propertyPath: waves.Array.data[0].totalEnemies
       value: 10

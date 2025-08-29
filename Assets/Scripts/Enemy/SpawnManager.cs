@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.UI;
+using UnityEngine.Tilemaps;
 
 [System.Serializable]
 public class LocationEnemies
@@ -21,6 +22,8 @@ public class SpawnManager : MonoBehaviour
     public float strongEnemyIncreasePerWave = 2f;
     public float spawnInterval = 3f;
     public float delayAfterWave = 5f;
+    public Tilemap tilemap;
+    AstarPath path;
 
     [Header("Locations")]
     public List<LocationEnemies> locations;
@@ -30,22 +33,144 @@ public class SpawnManager : MonoBehaviour
     public Text waveInfoText;
     public Text waveCountdownText;
 
+    [Header("Obstacles")]
+    public List<GameObject> obstaclePrefabs; // Префабы препятствий
+    public int maxObstacles = 10; // Максимальное количество препятствий
+    public string obstacleTag = "Obstacle"; // Тег для поиска препятствий
+
     private int currentWaveIndex = 0;
     private int enemiesSpawnedInWave = 0;
     private int strongEnemiesToSpawn = 0;
     private int enemiesRemaining = 0;
     private bool isWaveInProgress = false;
     private EnemyWave currentWave;
-
     private int currentEnemiesOnScene = 0;
 
     [Header("Spawn Cooldown")]
-    public float spawnCooldown = 0.5f; // Кулдаун на спавн
+    public float spawnCooldown = 0.5f;
     private float lastSpawnTime = 0f;
+
+    // Список для хранения созданных препятствий
+    private List<GameObject> currentObstacles = new List<GameObject>();
+
+    private void Awake()
+    {
+        path = FindAnyObjectByType<AstarPath>();
+    }
 
     private void Start()
     {
+        GenerateObstaclesOnGrid();
         StartNewWave();
+        path.Scan();
+    }
+
+    // Метод для получения случайной позиции на Tilemap
+    private Vector3 GetRandomTilePosition()
+    {
+        if (tilemap == null)
+        {
+            Debug.LogError("Tilemap not assigned!");
+            return Vector3.zero;
+        }
+
+        // Получаем границы всех занятых тайлов
+        BoundsInt bounds = tilemap.cellBounds;
+
+        // Создаем список всех занятых позиций
+        List<Vector3Int> occupiedPositions = new List<Vector3Int>();
+
+        // Проходим по всем ячейкам в границах
+        for (int x = bounds.xMin; x < bounds.xMax; x++)
+        {
+            for (int y = bounds.yMin; y < bounds.yMax; y++)
+            {
+                Vector3Int cellPosition = new Vector3Int(x, y, 0);
+                if (tilemap.HasTile(cellPosition))
+                {
+                    occupiedPositions.Add(cellPosition);
+                }
+            }
+        }
+
+        if (occupiedPositions.Count == 0)
+        {
+            Debug.LogWarning("No occupied tiles found on tilemap!");
+            return Vector3.zero;
+        }
+
+        // Выбираем случайную позицию
+        Vector3Int randomCell = occupiedPositions[Random.Range(0, occupiedPositions.Count)];
+
+        // Конвертируем клеточную позицию в мировые координаты и устанавливаем Z = -1
+        Vector3 worldPosition = tilemap.GetCellCenterWorld(randomCell);
+        worldPosition.z = 0f;
+        return worldPosition;
+    }
+
+    // Метод для удаления старых препятствий
+    private void ClearOldObstacles()
+    {
+        // Удаляем все препятствия из текущего списка
+        foreach (GameObject obstacle in currentObstacles)
+        {
+            if (obstacle != null)
+            {
+                Destroy(obstacle);
+            }
+        }
+        currentObstacles.Clear();
+
+        // Дополнительно ищем и удаляем все объекты с тегом Obstacle (на всякий случай)
+        GameObject[] existingObstacles = GameObject.FindGameObjectsWithTag(obstacleTag);
+        foreach (GameObject obstacle in existingObstacles)
+        {
+            if (obstacle != null)
+            {
+                Destroy(obstacle);
+            }
+        }
+    }
+
+    private void GenerateObstaclesOnGrid()
+    {
+        if (obstaclePrefabs == null || obstaclePrefabs.Count == 0 || tilemap == null)
+        {
+            Debug.LogWarning("Cannot generate obstacles - missing prefabs or tilemap");
+            return;
+        }
+
+        // Очищаем старые препятствия
+        ClearOldObstacles();
+
+        int obstaclesToSpawn = Random.Range(1, maxObstacles + 1);
+
+        for (int i = 0; i < obstaclesToSpawn; i++)
+        {
+            Vector3 spawnPosition = GetRandomTilePosition();
+
+            // Проверяем, чтобы позиция была валидной
+            if (spawnPosition != Vector3.zero)
+            {
+                GameObject randomObstacle = obstaclePrefabs[Random.Range(0, obstaclePrefabs.Count)];
+                GameObject newObstacle = Instantiate(randomObstacle, spawnPosition, Quaternion.identity);
+
+                // Добавляем тег для легкого поиска
+                newObstacle.tag = obstacleTag;
+
+                // Сохраняем ссылку на созданное препятствие
+                currentObstacles.Add(newObstacle);
+            }
+        }
+
+        Debug.Log($"Generated {obstaclesToSpawn} obstacles on tilemap");
+    }
+
+    // Метод для проверки, свободна ли позиция
+    private bool IsPositionFree(Vector3 position, float checkRadius = 1f)
+    {
+        Collider2D[] colliders = Physics2D.OverlapCircleAll(position, checkRadius);
+        return colliders.Length == 0;
     }
 
     private IEnumerator StartWaveWithDelay(float delay)
@@ -67,6 +192,9 @@ public class SpawnManager : MonoBehaviour
             yield return new WaitForSeconds(delay);
         }
 
+        // Генерируем новые препятствия перед началом волны
+        GenerateObstaclesOnGrid();
+        path.Scan();
         StartNewWave();
     }
 
@@ -78,7 +206,7 @@ public class SpawnManager : MonoBehaviour
         strongEnemiesToSpawn = Mathf.RoundToInt(currentWave.totalEnemies * currentWave.strongEnemyPercent / 100f);
         enemiesRemaining = currentWave.totalEnemies;
         currentEnemiesOnScene = 0;
-        lastSpawnTime = 0f; // Сбрасываем время последнего спавна
+        lastSpawnTime = 0f;
 
         UpdateWaveUI();
         StartCoroutine(SpawnWave(currentWave));
@@ -102,7 +230,7 @@ public class SpawnManager : MonoBehaviour
 
         while (enemiesSpawnedInWave < wave.totalEnemies)
         {
-            if (currentEnemiesOnScene < wave.totalEnemies && Time.time >= lastSpawnTime + spawnCooldown) // Проверяем кулдаун
+            if (currentEnemiesOnScene < wave.totalEnemies && Time.time >= lastSpawnTime + spawnCooldown)
             {
                 Transform spawnPoint = currentLocation.spawnPoints[Random.Range(0, currentLocation.spawnPoints.Count)];
 
@@ -130,12 +258,12 @@ public class SpawnManager : MonoBehaviour
                 enemiesSpawnedInWave++;
                 currentEnemiesOnScene++;
                 UpdateWaveUI();
-                lastSpawnTime = Time.time; // Обновляем время последнего спавна
-                yield return new WaitForSeconds(wave.spawnInterval); // Все равно ждем spawnInterval
+                lastSpawnTime = Time.time;
+                yield return new WaitForSeconds(wave.spawnInterval);
             }
             else
             {
-                yield return null; // Ждем до следующего кадра
+                yield return null;
             }
         }
 
@@ -183,6 +311,18 @@ public class SpawnManager : MonoBehaviour
             currentLocationIndex = locationIndex;
             Debug.Log($"Location changed to: {locations[currentLocationIndex].locationName}");
             UpdateWaveUI();
+        }
+    }
+
+    // Для дебага - отображение границ тайлмапа
+    private void OnDrawGizmosSelected()
+    {
+        if (tilemap != null)
+        {
+            BoundsInt bounds = tilemap.cellBounds;
+            Gizmos.color = Color.green;
+            Gizmos.DrawWireCube(tilemap.transform.position + new Vector3(bounds.center.x, bounds.center.y, 0),
+                               new Vector3(bounds.size.x, bounds.size.y, 0));
         }
     }
 }

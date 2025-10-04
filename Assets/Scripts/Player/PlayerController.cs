@@ -40,7 +40,7 @@ public class PlayerController : MonoBehaviour
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
-        rb.isKinematic = true;
+        
 
         // Получаем SpriteRenderer
         spriteRenderer = GetComponent<SpriteRenderer>();

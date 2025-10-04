@@ -30,7 +30,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -0.799, y: 0.22219053, z: -0.728}
-  m_LocalScale: {x: 0.1, y: 0.1, z: 4}
+  m_LocalScale: {x: 1, y: 1, z: 4}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -79,8 +79,8 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
-  m_Color: {r: 1, g: 0.9118239, b: 0, a: 1}
+  m_Sprite: {fileID: 1974206958, guid: 8c55210497fe781469502e3ed894ec9c, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -161,7 +161,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 0.1, y: 0.1}
   m_EdgeRadius: 0
 --- !u!114 &7027107393637014395
 MonoBehaviour:
@@ -175,7 +175,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6b4d51361e8c7ac478b30d64e5b10c13, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  damage: 1
+  baseDamage: 1
   targetTags:
   - Enemy
   hitEffect: {fileID: 0}
+  lifetime: 3

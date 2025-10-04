@@ -19,12 +19,12 @@ public class ScoreDisplay : MonoBehaviour
 
     private void UpdateCurrentScore(int score)
     {
-        currentScoreText.text = $"Score: {score}";
+        currentScoreText.text = $"{score}";
     }
 
     private void UpdateHighScore(int score)
     {
-        highScoreText.text = $"High Score: {score}";
+        highScoreText.text = $"{score}";
     }
 
     private void OnDestroy()

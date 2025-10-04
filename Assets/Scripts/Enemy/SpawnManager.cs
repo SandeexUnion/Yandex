@@ -80,10 +80,11 @@ public class SpawnManager : MonoBehaviour
         // Создаем список всех занятых позиций
         List<Vector3Int> occupiedPositions = new List<Vector3Int>();
 
-        // Проходим по всем ячейкам в границах
-        for (int x = bounds.xMin; x < bounds.xMax; x++)
+        // Проходим по всем ячейкам в границах с нужными отступами:
+        // Слева и справа по 3 клетки, сверху и снизу по 2 клетки
+        for (int x = bounds.xMin + 8; x < bounds.xMax - 4; x++)
         {
-            for (int y = bounds.yMin; y < bounds.yMax; y++)
+            for (int y = bounds.yMin + 4; y < bounds.yMax - 3; y++)
             {
                 Vector3Int cellPosition = new Vector3Int(x, y, 0);
                 if (tilemap.HasTile(cellPosition))
@@ -102,7 +103,7 @@ public class SpawnManager : MonoBehaviour
         // Выбираем случайную позицию
         Vector3Int randomCell = occupiedPositions[Random.Range(0, occupiedPositions.Count)];
 
-        // Конвертируем клеточную позицию в мировые координаты и устанавливаем Z = -1
+        // Конвертируем клеточную позицию в мировые координаты и устанавливаем Z = 0
         Vector3 worldPosition = tilemap.GetCellCenterWorld(randomCell);
         worldPosition.z = 0f;
         return worldPosition;

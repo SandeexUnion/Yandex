@@ -17,6 +17,7 @@ public class NPCController : MonoBehaviour
     private bool isDead = false;
     private float lastAttackTime; // Время последней атаки
     public float attackCooldown = 1f; // Задержка между атаками
+    public ScoreManager scoreManager;
 
     public event Action OnDeath; // Событие смерти
 
@@ -28,7 +29,7 @@ public class NPCController : MonoBehaviour
         animator = GetComponent<Animator>();
         rb = GetComponent<Rigidbody2D>();
 
-        // Проверки на null остаются как есть...
+        scoreManager = FindAnyObjectByType<ScoreManager>();
 
         ai.maxSpeed = moveSpeed;
         ai.enableRotation = false;
@@ -84,7 +85,7 @@ public class NPCController : MonoBehaviour
     }
     public void TakeDamage(int damage)
     {
-        // ... (ваш код получения урона)
+        
 
         if (HP <= 0 && !isDead) // Проверяем флаг!
         {
@@ -101,6 +102,7 @@ public class NPCController : MonoBehaviour
     {
         // ... (ваш код смерти)
         OnDeath?.Invoke(); // Вызываем событие
+        scoreManager.AddScore(1);
         Destroy(gameObject);
     }
 

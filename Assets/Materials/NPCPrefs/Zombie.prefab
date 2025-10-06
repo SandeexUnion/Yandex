@@ -196,10 +196,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveSpeed: 3
   stoppingDistance: 0
-  attackRange: 0.5
+  attackRange: 1
   damagePerSecond: 1
   HP: 0
   attackCooldown: 1
+  scoreManager: {fileID: 0}
 --- !u!212 &915869673920051393
 SpriteRenderer:
   m_ObjectHideFlags: 0

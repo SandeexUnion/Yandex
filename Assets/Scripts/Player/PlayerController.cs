@@ -96,10 +96,21 @@ public class PlayerController : MonoBehaviour
     {
         animator.SetTrigger(Hurt);
     }
-
+    public void SetInputEnabled(bool enabled)
+    {
+        this.enabled = enabled;
+        // Дополнительно можно отключить другие компоненты, если нужно
+    }
     public void PlayDeathAnimation()
     {
         animator.SetTrigger(Die);
+
+        // Отключаем управление во время смерти
+        SetInputEnabled(false);
+
+        // Останавливаем движение
+        rb.linearVelocity = Vector2.zero;
+        movement = Vector2.zero;
     }
 
     // Установка нового оружия

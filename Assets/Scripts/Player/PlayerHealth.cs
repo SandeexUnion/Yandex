@@ -26,7 +26,7 @@ public class PlayerHealth : MonoBehaviour
             currentHealth -= damageAmount;
 
             // ����������� �������� ��������� �����
-            playerController.PlayHurtAnimation();
+            
 
             Debug.Log("Player Health: " + currentHealth);
 

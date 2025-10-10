@@ -119,4 +119,11 @@ public class PowerUpManager : MonoBehaviour
         yield return new WaitForSeconds(60);
         player.moveSpeed = originalMoveSpeed;
     }
+
+    //9. Увеличение скорострельности
+    public void ActivateFireRateBoost()
+    {
+        player.SetWeapon(player.CurrentWeaponObject, 0.1f);
+        //weapon.GetComponent<Weapon>().fireRate = 0.1f;
+    }
 }

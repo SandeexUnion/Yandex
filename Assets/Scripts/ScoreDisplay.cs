@@ -1,10 +1,11 @@
 using UnityEngine;
 using TMPro;
+using UnityEngine.UI;
 
 public class ScoreDisplay : MonoBehaviour
 {
-    [SerializeField] private TMP_Text currentScoreText;
-    [SerializeField] private TMP_Text highScoreText;
+    [SerializeField] private Text currentScoreText;
+    [SerializeField] private Text highScoreText;
 
     private void Start()
     {
@@ -19,12 +20,12 @@ public class ScoreDisplay : MonoBehaviour
 
     private void UpdateCurrentScore(int score)
     {
-        currentScoreText.text = $"{score}";
+        currentScoreText.text = $"Очки: {score}";
     }
 
     private void UpdateHighScore(int score)
     {
-        highScoreText.text = $"{score}";
+        highScoreText.text = $"Рекорд: {score}";
     }
 
     private void OnDestroy()

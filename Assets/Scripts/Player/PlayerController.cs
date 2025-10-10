@@ -22,7 +22,7 @@ public class PlayerController : MonoBehaviour
     public Animator animator;
     public float animationSmoothing = 0.1f;
 
-    private IWeapon currentWeapon;
+    
     private Rigidbody2D rb;
     private Vector2 movement;
     private float nextFireTime;
@@ -35,7 +35,13 @@ public class PlayerController : MonoBehaviour
     private static readonly int Hurt = Animator.StringToHash("Hurt");
     private static readonly int Die = Animator.StringToHash("Die");
 
+    // ПЕРЕМЕННЫЕ ДЛЯ ХРАНЕНИЯ ОРУЖИЯ
+    public IWeapon currentWeapon;          // Интерфейс оружия (для логики стрельбы)
+    private GameObject currentWeaponObject; // GameObject текущего оружия (ссылка)
+
     private SpriteRenderer spriteRenderer;  // Ссылка на SpriteRenderer
+    // Публичное свойство для доступа к текущему оружию из других скриптов
+    public GameObject CurrentWeaponObject => currentWeaponObject;
 
     private void Awake()
     {
@@ -117,30 +123,46 @@ public class PlayerController : MonoBehaviour
     public void SetWeapon(GameObject weaponPrefab, float duration = 60f)
     {
         // Удаляем текущее оружие, если оно есть
-        if (currentWeapon != null)
+        if (currentWeaponObject != null)
         {
-            Destroy((currentWeapon as MonoBehaviour)); // Уничтожаем GameObject, на котором висит скрипт оружия
+            Destroy(currentWeaponObject); // Уничтожаем GameObject оружия
+            currentWeapon = null;
+            currentWeaponObject = null;
         }
 
-        // Добавляем новое оружие
-        GameObject weaponObject = Instantiate(weaponPrefab);
-        weaponObject.transform.SetParent(transform); // Важно: делаем оружие дочерним объектом игрока, чтобы оно двигалось вместе с ним
-        weaponObject.gameObject.GetComponent<SpriteRenderer>().enabled = false;
-        weaponObject.transform.localPosition = Vector3.zero; //  Устанавливаем позицию относительно игрока
+        // Создаем новое оружие
+        currentWeaponObject = Instantiate(weaponPrefab);
+        currentWeaponObject.transform.SetParent(transform);
+        currentWeaponObject.transform.localPosition = Vector3.zero;
 
-        currentWeapon = weaponObject.GetComponent<IWeapon>();
+        // Отключаем спрайт оружия (если нужно)
+        SpriteRenderer weaponSprite = currentWeaponObject.GetComponent<SpriteRenderer>();
+        if (weaponSprite != null)
+        {
+            weaponSprite.enabled = false;
+        }
+
+        // Получаем компонент IWeapon
+        currentWeapon = currentWeaponObject.GetComponent<IWeapon>();
 
         if (currentWeapon == null)
         {
             Debug.LogError("Weapon prefab does not implement IWeapon interface!");
+            Destroy(currentWeaponObject);
+            currentWeaponObject = null;
             return;
         }
+
+        // Логируем смену оружия (для отладки)
+        Debug.Log($"Weapon changed to: {currentWeaponObject.name}");
 
         // Останавливаем корутину переключения оружия
         if (weaponSwitchCoroutine != null)
         {
             StopCoroutine(weaponSwitchCoroutine);
         }
+
+        // Запускаем корутину для возврата к пистолету через время
         if (duration > 0)
         {
             weaponSwitchCoroutine = StartCoroutine(SwitchToDefaultWeaponAfterDelay(duration));
@@ -151,8 +173,13 @@ public class PlayerController : MonoBehaviour
     private IEnumerator SwitchToDefaultWeaponAfterDelay(float delay)
     {
         yield return new WaitForSeconds(delay);
-        // Предполагаем, что у вас есть префаб пистолета, который можно добавить
-        SetWeapon(pistolPrefab); // Вместо параметров - префаб
+
+        // Возвращаем пистолет только если у нас все еще то же временное оружие
+        if (currentWeaponObject != null && currentWeaponObject.name != pistolPrefab.name + "(Clone)")
+        {
+            SetWeapon(pistolPrefab);
+            Debug.Log("Returned to default pistol");
+        }
     }
 
     private void HandleMovementInput()

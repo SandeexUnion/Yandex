@@ -1,6 +1,4 @@
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.UI;
 
 public abstract class Weapon : MonoBehaviour, IWeapon
 {
@@ -36,7 +34,10 @@ public abstract class Weapon : MonoBehaviour, IWeapon
     {
         GameObject projectile = Instantiate(projectilePrefab, position, Quaternion.identity);
         Rigidbody2D rb = projectile.GetComponent<Rigidbody2D>();
-        rb.linearVelocity = direction * projectileSpeed;
+        if (rb != null)
+        {
+            rb.linearVelocity = direction * projectileSpeed;
+        }
 
         float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
         projectile.transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
@@ -44,7 +45,12 @@ public abstract class Weapon : MonoBehaviour, IWeapon
         Destroy(projectile, projectileLifetime);
 
         // Игнорируем коллайдер игрока
-        Physics2D.IgnoreCollision(projectile.GetComponent<Collider2D>(), transform.parent.GetComponent<Collider2D>());
+        Collider2D projectileCollider = projectile.GetComponent<Collider2D>();
+        Collider2D playerCollider = transform.parent?.GetComponent<Collider2D>();
+        if (projectileCollider != null && playerCollider != null)
+        {
+            Physics2D.IgnoreCollision(projectileCollider, playerCollider);
+        }
 
         return projectile;
     }
@@ -53,8 +59,8 @@ public abstract class Weapon : MonoBehaviour, IWeapon
     {
         if (muzzleFlashPrefab != null)
         {
-            GameObject muzzleFlash = Instantiate(muzzleFlashPrefab.gameObject, firePoint.position, firePoint.rotation);
-            Destroy(muzzleFlash, 0.1f); // Время жизни вспышки
+            GameObject muzzleFlash = Instantiate(muzzleFlashPrefab, firePoint.position, firePoint.rotation);
+            Destroy(muzzleFlash, 0.1f);
         }
     }
 }

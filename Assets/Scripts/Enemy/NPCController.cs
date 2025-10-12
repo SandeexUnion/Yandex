@@ -85,22 +85,19 @@ public class NPCController : MonoBehaviour
     }
     public void TakeDamage(int damage)
     {
-        
 
+        HP -= damage;
         if (HP <= 0 && !isDead) // Проверяем флаг!
         {
             isDead = true; // Устанавливаем флаг
             Die();
         }
-        else
-        {
-            HP--;
-        }
+        
     }
 
     public void Die()
     {
-        // ... (ваш код смерти)
+        
         OnDeath?.Invoke(); // Вызываем событие
         scoreManager.AddScore(1);
         Destroy(gameObject);

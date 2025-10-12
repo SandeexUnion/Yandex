@@ -68,30 +68,13 @@ public class PowerUpManager : MonoBehaviour
     // 5. Пулемет
     public void ActivateMachinegun()
     {
-        player.SetWeapon(machinegunPrefab, 1f);
-        //weapon.GetComponent<Weapon>().fireRate = 0.1f;
+        player.SetWeapon(machinegunPrefab, 15f); // Исправлено: 15 секунд вместо 1
     }
 
     // 6. Стрельба в 4 стороны
-    public void ActivateQuadShot()
+    public void ActivateQuadShot(float duration)
     {
-        StartCoroutine(QuadShotCoroutine());
-    }
-
-    private IEnumerator QuadShotCoroutine()
-    {
-        var originalFirePoints = new List<Transform>(player.firePoints);
-        player.firePoints.AddRange(new Transform[] {
-            Instantiate(player.firePointUp, player.transform),
-            Instantiate(player.firePointDown, player.transform),
-            Instantiate(player.firePointLeft, player.transform),
-            Instantiate(player.firePointRight, player.transform)
-        });
-
-        yield return new WaitForSeconds(60);
-
-        // Возвращаем оригинальные точки стрельбы
-        player.firePoints = originalFirePoints;
+        player.ActivateQuadShot(duration); // 15 секунд
     }
 
     // 7. Увеличение урона
@@ -120,10 +103,24 @@ public class PowerUpManager : MonoBehaviour
         player.moveSpeed = originalMoveSpeed;
     }
 
-    //9. Увеличение скорострельности
+    // 9. Увеличение скорострельности
     public void ActivateFireRateBoost()
     {
-        player.SetWeapon(player.CurrentWeaponObject, 0.1f);
-        //weapon.GetComponent<Weapon>().fireRate = 0.1f;
+        StartCoroutine(FireRateBoostCoroutine());
+    }
+
+    private IEnumerator FireRateBoostCoroutine()
+    {
+        // Сохраняем оригинальную скорострельность
+        Weapon weapon = player.CurrentWeaponObject.GetComponent<Weapon>();
+        float originalFireRate = weapon.fireRate;
+
+        // Увеличиваем скорострельность
+        weapon.fireRate /= 2f;
+
+        yield return new WaitForSeconds(60);
+
+        // Восстанавливаем оригинальную скорострельность
+        weapon.fireRate = originalFireRate;
     }
 }

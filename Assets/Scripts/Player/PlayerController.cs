@@ -22,7 +22,9 @@ public class PlayerController : MonoBehaviour
     public Animator animator;
     public float animationSmoothing = 0.1f;
 
-    
+    [Header("Quad Shot")]
+    public bool isQuadShotActive = false;
+
     private Rigidbody2D rb;
     private Vector2 movement;
     private float nextFireTime;
@@ -34,22 +36,20 @@ public class PlayerController : MonoBehaviour
     private static readonly int Speed = Animator.StringToHash("Speed");
     private static readonly int Hurt = Animator.StringToHash("Hurt");
     private static readonly int Die = Animator.StringToHash("Die");
+    public bool isFireRateWasChange = false;
 
     // ПЕРЕМЕННЫЕ ДЛЯ ХРАНЕНИЯ ОРУЖИЯ
     public IWeapon currentWeapon;          // Интерфейс оружия (для логики стрельбы)
     private GameObject currentWeaponObject; // GameObject текущего оружия (ссылка)
 
     private SpriteRenderer spriteRenderer;  // Ссылка на SpriteRenderer
-    // Публичное свойство для доступа к текущему оружию из других скриптов
     public GameObject CurrentWeaponObject => currentWeaponObject;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
-        
-
-        // Получаем SpriteRenderer
         spriteRenderer = GetComponent<SpriteRenderer>();
+
         if (spriteRenderer == null)
         {
             Debug.LogError("SpriteRenderer not found on PlayerController!");
@@ -68,21 +68,19 @@ public class PlayerController : MonoBehaviour
         HandleMovementInput();
         HandleShootingInput();
         UpdateAnimations();
-        HandleSpriteFlipping(); // Добавляем функцию для поворота спрайта
+        HandleSpriteFlipping();
     }
 
     private void HandleSpriteFlipping()
     {
-        // Отражаем спрайт по горизонтали в зависимости от направления движения
         if (movement.x > 0)
         {
-            spriteRenderer.flipX = false; // Смотрим вправо
+            spriteRenderer.flipX = false;
         }
         else if (movement.x < 0)
         {
-            spriteRenderer.flipX = true; // Смотрим влево
+            spriteRenderer.flipX = true;
         }
-        // Если movement.x == 0, не меняем flipX, чтобы персонаж смотрел в последнюю сторону
     }
 
     private void UpdateAnimations()
@@ -92,7 +90,6 @@ public class PlayerController : MonoBehaviour
             lastDirection = movement.normalized;
         }
 
-        // Плавное изменение параметров анимации
         animator.SetFloat(MoveX, lastDirection.x, animationSmoothing, Time.deltaTime);
         animator.SetFloat(MoveY, lastDirection.y, animationSmoothing, Time.deltaTime);
         animator.SetFloat(Speed, movement.magnitude);
@@ -102,19 +99,16 @@ public class PlayerController : MonoBehaviour
     {
         animator.SetTrigger(Hurt);
     }
+
     public void SetInputEnabled(bool enabled)
     {
         this.enabled = enabled;
-        // Дополнительно можно отключить другие компоненты, если нужно
     }
+
     public void PlayDeathAnimation()
     {
         animator.SetTrigger(Die);
-
-        // Отключаем управление во время смерти
         SetInputEnabled(false);
-
-        // Останавливаем движение
         rb.linearVelocity = Vector2.zero;
         movement = Vector2.zero;
     }
@@ -122,27 +116,28 @@ public class PlayerController : MonoBehaviour
     // Установка нового оружия
     public void SetWeapon(GameObject weaponPrefab, float duration = 60f)
     {
-        // Удаляем текущее оружие, если оно есть
         if (currentWeaponObject != null)
         {
-            Destroy(currentWeaponObject); // Уничтожаем GameObject оружия
+            Destroy(currentWeaponObject);
             currentWeapon = null;
             currentWeaponObject = null;
         }
 
-        // Создаем новое оружие
         currentWeaponObject = Instantiate(weaponPrefab);
         currentWeaponObject.transform.SetParent(transform);
         currentWeaponObject.transform.localPosition = Vector3.zero;
 
-        // Отключаем спрайт оружия (если нужно)
+        if (isFireRateWasChange)
+        {
+            currentWeaponObject.GetComponent<Weapon>().fireRate /= 2f;
+        }
+
         SpriteRenderer weaponSprite = currentWeaponObject.GetComponent<SpriteRenderer>();
         if (weaponSprite != null)
         {
             weaponSprite.enabled = false;
         }
 
-        // Получаем компонент IWeapon
         currentWeapon = currentWeaponObject.GetComponent<IWeapon>();
 
         if (currentWeapon == null)
@@ -153,28 +148,23 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        // Логируем смену оружия (для отладки)
         Debug.Log($"Weapon changed to: {currentWeaponObject.name}");
 
-        // Останавливаем корутину переключения оружия
         if (weaponSwitchCoroutine != null)
         {
             StopCoroutine(weaponSwitchCoroutine);
         }
 
-        // Запускаем корутину для возврата к пистолету через время
         if (duration > 0)
         {
             weaponSwitchCoroutine = StartCoroutine(SwitchToDefaultWeaponAfterDelay(duration));
         }
     }
 
-    // Возврат к пистолету через время
     private IEnumerator SwitchToDefaultWeaponAfterDelay(float delay)
     {
         yield return new WaitForSeconds(delay);
 
-        // Возвращаем пистолет только если у нас все еще то же временное оружие
         if (currentWeaponObject != null && currentWeaponObject.name != pistolPrefab.name + "(Clone)")
         {
             SetWeapon(pistolPrefab);
@@ -224,7 +214,78 @@ public class PlayerController : MonoBehaviour
 
         if (isShooting && Time.time >= nextFireTime)
         {
-            Shoot(shootDirection);
+            if (isQuadShotActive)
+            {
+                ShootInAllDirections();
+            }
+            else
+            {
+                Shoot(shootDirection);
+            }
+        }
+    }
+
+    private void ShootInAllDirections()
+    {
+        if (currentWeapon != null && Time.time >= nextFireTime)
+        {
+            // Для дробовика используем специальную логику
+            if (currentWeapon is ShotgunWeapon shotgun)
+            {
+                // Дробовик стреляет веером в каждом направлении
+                shotgun.FireMultiple(Vector2.up, firePointUp, shotgun.bulletCount, shotgun.spreadAngle);
+                shotgun.FireMultiple(Vector2.down, firePointDown, shotgun.bulletCount, shotgun.spreadAngle);
+                shotgun.FireMultiple(Vector2.left, firePointLeft, shotgun.bulletCount, shotgun.spreadAngle);
+                shotgun.FireMultiple(Vector2.right, firePointRight, shotgun.bulletCount, shotgun.spreadAngle);
+
+                // Muzzle flash для всех точек
+                shotgun.DisplayMuzzleFlash(firePointUp);
+                shotgun.DisplayMuzzleFlash(firePointDown);
+                shotgun.DisplayMuzzleFlash(firePointLeft);
+                shotgun.DisplayMuzzleFlash(firePointRight);
+            }
+            else
+            {
+                // Для обычного оружия просто создаем снаряды во всех направлениях
+                CreateProjectileForDirection(Vector2.up, firePointUp);
+                CreateProjectileForDirection(Vector2.down, firePointDown);
+                CreateProjectileForDirection(Vector2.left, firePointLeft);
+                CreateProjectileForDirection(Vector2.right, firePointRight);
+            }
+
+            nextFireTime = Time.time + currentWeapon.FireRate;
+        }
+    }
+
+    private void CreateProjectileForDirection(Vector2 direction, Transform firePoint)
+    {
+        Weapon weapon = currentWeapon as Weapon;
+        if (weapon != null)
+        {
+            GameObject projectile = Instantiate(weapon.projectilePrefab, firePoint.position, Quaternion.identity);
+            Rigidbody2D rb = projectile.GetComponent<Rigidbody2D>();
+            if (rb != null)
+            {
+                rb.linearVelocity = direction * weapon.projectileSpeed;
+            }
+
+            float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+            projectile.transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
+
+            Destroy(projectile, weapon.projectileLifetime);
+
+            Collider2D projectileCollider = projectile.GetComponent<Collider2D>();
+            Collider2D playerCollider = GetComponent<Collider2D>();
+            if (projectileCollider != null && playerCollider != null)
+            {
+                Physics2D.IgnoreCollision(projectileCollider, playerCollider);
+            }
+
+            if (weapon.muzzleFlashPrefab != null)
+            {
+                GameObject muzzleFlash = Instantiate(weapon.muzzleFlashPrefab, firePoint.position, firePoint.rotation);
+                Destroy(muzzleFlash, 0.1f);
+            }
         }
     }
 
@@ -235,6 +296,26 @@ public class PlayerController : MonoBehaviour
             currentWeapon.Fire(direction, currentFirePoint);
             nextFireTime = Time.time + currentWeapon.FireRate;
         }
+    }
+
+    // Метод для активации QuadShot из PowerUpManager
+    public void ActivateQuadShot(float duration)
+    {
+        if (!isQuadShotActive)
+        {
+            StartCoroutine(QuadShotCoroutine(duration));
+        }
+    }
+
+    private IEnumerator QuadShotCoroutine(float duration)
+    {
+        isQuadShotActive = true;
+        Debug.Log("QuadShot activated!");
+
+        yield return new WaitForSeconds(duration);
+
+        isQuadShotActive = false;
+        Debug.Log("QuadShot deactivated!");
     }
 
     private void FixedUpdate()
@@ -249,7 +330,7 @@ public class PlayerController : MonoBehaviour
             WeaponPickup pickup = collision.GetComponent<WeaponPickup>();
             if (pickup != null)
             {
-                SetWeapon(pickup.weaponPrefab, timeDuration);  // Передаем префаб и длительность
+                SetWeapon(pickup.weaponPrefab, timeDuration);
                 Destroy(collision.gameObject);
             }
         }

@@ -18,11 +18,12 @@ public class NPCController : MonoBehaviour
     private float lastAttackTime; // Время последней атаки
     public float attackCooldown = 1f; // Задержка между атаками
     public ScoreManager scoreManager;
-
+    Division d = new Division();
     public event Action OnDeath; // Событие смерти
 
     private void Start()
     {
+        d = GetComponent<Division>();
         player = GameObject.FindGameObjectWithTag("Player").transform;
         ai = GetComponent<AIPath>();
         aiLerp = GetComponent<AILerp>();
@@ -92,14 +93,19 @@ public class NPCController : MonoBehaviour
             isDead = true; // Устанавливаем флаг
             Die();
         }
-        
+
     }
 
     public void Die()
     {
-        
+
         OnDeath?.Invoke(); // Вызываем событие
         scoreManager.AddScore(1);
+        if (gameObject.GetComponent<Division>() != null)
+        {
+
+            d.SpawnTwoEnemysAfterDeath();
+        }
         Destroy(gameObject);
     }
 

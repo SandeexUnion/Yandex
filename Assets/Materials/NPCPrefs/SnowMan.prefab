@@ -17,6 +17,7 @@ GameObject:
   - component: {fileID: 915869673920051393}
   - component: {fileID: 8971489435868188235}
   - component: {fileID: 4689594724167133661}
+  - component: {fileID: 1000271388459007530}
   m_Layer: 0
   m_Name: SnowMan
   m_TagString: Enemy
@@ -200,6 +201,7 @@ MonoBehaviour:
   damagePerSecond: 1
   HP: 2
   attackCooldown: 1
+  scoreManager: {fileID: 0}
 --- !u!212 &915869673920051393
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -306,3 +308,16 @@ MonoBehaviour:
   targetCompatibility: {fileID: 0}
   repathRateCompatibility: NaN
   canSearchCompability: 0
+--- !u!114 &1000271388459007530
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9119747726117162004}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ffdb349dd60b3cf4c841e19bb071a36f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  enemyPref: {fileID: 9119747726117162004, guid: 38716c7ff41e7844798a5e6c4f60d16c, type: 3}

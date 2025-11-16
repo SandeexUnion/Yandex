@@ -1,8 +1,12 @@
-using UnityEngine;
+using NUnit.Framework;
+using System;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine.UI;
+using UnityEditor.SearchService;
+using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.Tilemaps;
+using UnityEngine.UI;
 
 [System.Serializable]
 public class LocationEnemies
@@ -37,8 +41,10 @@ public class SpawnManager : MonoBehaviour
     public List<GameObject> obstaclePrefabs; // Префабы препятствий
     public int maxObstacles = 10; // Максимальное количество препятствий
     public string obstacleTag = "Obstacle"; // Тег для поиска препятствий
+    Buying Buying = new Buying();
 
     private int currentWaveIndex = 0;
+    public int CurrentWaveIndex { get;set; }
     private int enemiesSpawnedInWave = 0;
     private int strongEnemiesToSpawn = 0;
     private int enemiesRemaining = 0;
@@ -50,19 +56,59 @@ public class SpawnManager : MonoBehaviour
     public float spawnCooldown = 0.5f;
     private float lastSpawnTime = 0f;
 
+    [Header("Perks")]
+    [SerializeField] List<PowerUp> perks = new List<PowerUp>();
+    [SerializeField] GameObject barierBuying;
+
     // Список для хранения созданных препятствий
     private List<GameObject> currentObstacles = new List<GameObject>();
 
     private void Awake()
     {
         path = FindAnyObjectByType<AstarPath>();
+        
     }
 
     private void Start()
     {
-        GenerateObstaclesOnGrid();
-        StartNewWave();
-        path.Scan();
+        Observer observer = new Observer();
+        if (!CheckScene())
+        {
+            GenerateObstaclesOnGrid();
+            StartNewWave();
+            path.Scan();
+        }
+        else
+        {
+            observer.GeneratePriceByWave();
+        }
+    }
+    bool CheckScene()
+    {
+        if(SceneManager.GetActiveScene().name.Contains("shop"))
+        {
+            GenerateShop();
+            return true;
+        }
+        return false;
+    }
+
+    void GenerateShop()
+    {
+        SpawnPerks();
+    }
+    void SpawnPerks()
+    {
+        if(perks.Count > 0)
+        {
+            
+            Instantiate(perks[UnityEngine.Random.Range(0,perks.Count)],new Vector2(2.5f,2.5f), Quaternion.identity); Instantiate(barierBuying, new Vector2(2.5f, 2.5f), Quaternion.identity); 
+            Instantiate(perks[UnityEngine.Random.Range(0, perks.Count)], new Vector2(0f, 2.5f), Quaternion.identity); Instantiate(barierBuying, new Vector2(0f, 2.5f), Quaternion.identity);
+            Instantiate(perks[UnityEngine.Random.Range(0, perks.Count)], new Vector2(-2.5f, 2.5f), Quaternion.identity); Instantiate(barierBuying, new Vector2(-2.5f, 2.5f), Quaternion.identity);
+
+
+        }
+        
     }
 
     // Метод для получения случайной позиции на Tilemap
@@ -101,7 +147,7 @@ public class SpawnManager : MonoBehaviour
         }
 
         // Выбираем случайную позицию
-        Vector3Int randomCell = occupiedPositions[Random.Range(0, occupiedPositions.Count)];
+        Vector3Int randomCell = occupiedPositions[UnityEngine.Random.Range(0, occupiedPositions.Count)];
 
         // Конвертируем клеточную позицию в мировые координаты и устанавливаем Z = 0
         Vector3 worldPosition = tilemap.GetCellCenterWorld(randomCell);
@@ -144,7 +190,7 @@ public class SpawnManager : MonoBehaviour
         // Очищаем старые препятствия
         ClearOldObstacles();
 
-        int obstaclesToSpawn = Random.Range(1, maxObstacles + 1);
+        int obstaclesToSpawn = UnityEngine.Random.Range(1, maxObstacles + 1);
 
         for (int i = 0; i < obstaclesToSpawn; i++)
         {
@@ -153,7 +199,7 @@ public class SpawnManager : MonoBehaviour
             // Проверяем, чтобы позиция была валидной
             if (spawnPosition != Vector3.zero)
             {
-                GameObject randomObstacle = obstaclePrefabs[Random.Range(0, obstaclePrefabs.Count)];
+                GameObject randomObstacle = obstaclePrefabs[UnityEngine.Random.Range(0, obstaclePrefabs.Count)];
                 GameObject newObstacle = Instantiate(randomObstacle, spawnPosition, Quaternion.identity);
 
                 // Добавляем тег для легкого поиска
@@ -224,36 +270,48 @@ public class SpawnManager : MonoBehaviour
         return wave;
     }
 
+    // В методе SpawnWave добавляем регистрацию NPC в MoneySpawner
     private IEnumerator SpawnWave(EnemyWave wave)
     {
         isWaveInProgress = true;
         var currentLocation = locations[currentLocationIndex];
 
+        // Получаем MoneySpawner
+        MoneyController moneySpawner = FindObjectOfType<MoneyController>();
+
         while (enemiesSpawnedInWave < wave.totalEnemies)
         {
             if (currentEnemiesOnScene < wave.totalEnemies && Time.time >= lastSpawnTime + spawnCooldown)
             {
-                Transform spawnPoint = currentLocation.spawnPoints[Random.Range(0, currentLocation.spawnPoints.Count)];
+                Transform spawnPoint = currentLocation.spawnPoints[UnityEngine.Random.Range(0, currentLocation.spawnPoints.Count)];
 
                 bool spawnStrongEnemy = strongEnemiesToSpawn > 0 &&
-                                         Random.value <= (float)strongEnemiesToSpawn / (wave.totalEnemies - enemiesSpawnedInWave);
+                                         UnityEngine.Random.value <= (float)strongEnemiesToSpawn / (wave.totalEnemies - enemiesSpawnedInWave);
 
                 GameObject enemyToSpawn;
                 if (spawnStrongEnemy && currentLocation.strongEnemies.Count > 0)
                 {
-                    enemyToSpawn = currentLocation.strongEnemies[Random.Range(0, currentLocation.strongEnemies.Count)];
+                    enemyToSpawn = currentLocation.strongEnemies[UnityEngine.Random.Range(0, currentLocation.strongEnemies.Count)];
                     strongEnemiesToSpawn--;
                 }
                 else
                 {
-                    enemyToSpawn = currentLocation.normalEnemies[Random.Range(0, currentLocation.normalEnemies.Count)];
+                    enemyToSpawn = currentLocation.normalEnemies[UnityEngine.Random.Range(0, currentLocation.normalEnemies.Count)];
                 }
 
                 GameObject spawnedEnemy = Instantiate(enemyToSpawn, spawnPoint.position, spawnPoint.rotation);
                 NPCController enemyController = spawnedEnemy.GetComponent<NPCController>();
+
                 if (enemyController != null)
                 {
+                    // Подписываемся на смерть для волн
                     enemyController.OnDeath += () => EnemyDied();
+
+                    // Регистрируем в MoneySpawner для спавна денег
+                    if (moneySpawner != null)
+                    {
+                        moneySpawner.RegisterNPC(spawnedEnemy);
+                    }
                 }
 
                 enemiesSpawnedInWave++;
@@ -327,6 +385,7 @@ public class SpawnManager : MonoBehaviour
         }
     }
 }
+
 
 [System.Serializable]
 public class EnemyWave

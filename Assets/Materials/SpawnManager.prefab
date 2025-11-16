@@ -72,6 +72,8 @@ GameObject:
   m_Component:
   - component: {fileID: 4005361963660902292}
   - component: {fileID: 5613466582114047619}
+  - component: {fileID: 1126990284831974644}
+  - component: {fileID: 8562332880444999129}
   m_Layer: 0
   m_Name: SpawnManager
   m_TagString: Untagged
@@ -110,13 +112,64 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3ee41b69679aea447b82b92b01c1f650, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  npcPrefab: {fileID: 9119747726117162004, guid: 37ff6901f8825fe4790ea322583c727d, type: 3}
+  initialEnemiesPerWave: 5
+  enemyIncreasePerWave: 2
+  initialStrongEnemyPercent: 10
+  strongEnemyIncreasePerWave: 2
   spawnInterval: 1
-  spawnPoints:
-  - {fileID: 9176652797641809791}
-  - {fileID: 3853768331089151766}
-  - {fileID: 5605161054193329744}
-  - {fileID: 2307220522419845153}
+  delayAfterWave: 5
+  tilemap: {fileID: 0}
+  locations:
+  - locationName: Forest
+    normalEnemies:
+    - {fileID: 9119747726117162004, guid: 37ff6901f8825fe4790ea322583c727d, type: 3}
+    strongEnemies:
+    - {fileID: 9119747726117162004, guid: 4e9adb7bb24af214b92a82f1f22d5d87, type: 3}
+    spawnPoints:
+    - {fileID: 9176652797641809791}
+    - {fileID: 3853768331089151766}
+    - {fileID: 5605161054193329744}
+    - {fileID: 2307220522419845153}
+  waveInfoText: {fileID: 0}
+  waveCountdownText: {fileID: 0}
+  obstaclePrefabs:
+  - {fileID: 6189168690799200897, guid: 0991bad838b19564399d509b5c4f5231, type: 3}
+  maxObstacles: 10
+  obstacleTag: Obstacle
+  spawnCooldown: 0.5
+  perks:
+  - {fileID: 3388180618277534105, guid: 7cec929d7c014eb4898c9f8196d230c6, type: 3}
+  - {fileID: 8409532700653498453, guid: 24e14b6387c504e41b29e1a134adf7ba, type: 3}
+  - {fileID: 943303137810707211, guid: 14e4457207f26454cb95f1b3be09d134, type: 3}
+  barierBuying: {fileID: 7535087810180665688, guid: e128261fe6dfd234283160db3147226c, type: 3}
+--- !u!114 &1126990284831974644
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2141491867864840579}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4bdcabc6593e2e54b8201088ec37a79c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  moneyPrefab: {fileID: 3045794582984323735, guid: 72a46105b333ac84a8c88e933def8b4e, type: 3}
+  spawnChance: 0.7
+  minMoney: 1
+  maxMoney: 4
+--- !u!114 &8562332880444999129
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2141491867864840579}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bf1a9eb5d70706343b121d8eff4f7f53, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &5943378641607391585
 GameObject:
   m_ObjectHideFlags: 0

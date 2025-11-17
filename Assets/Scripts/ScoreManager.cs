@@ -15,38 +15,50 @@ public class ScoreManager : MonoBehaviour
 
     private const string HighScoreKey = "HighScore";
     private const string MoneyKey = "Money";
-    Observer observer;
 
     private void Awake()
     {
-        observer = GetComponent<Observer>();
         if (Instance == null)
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
+
+            // Загружаем только постоянные данные
+            highScore = PlayerPrefs.GetInt(HighScoreKey, 0);
+            // money загружаем из PlayerPrefs только для отображения в магазине и т.д.
         }
         else
         {
             Destroy(gameObject);
             return;
         }
+    }
 
-        // Загружаем сохраненный рекорд и деньги
-        highScore = PlayerPrefs.GetInt(HighScoreKey, 0);
-        money = PlayerPrefs.GetInt(MoneyKey, 0);
+    // Вызывается при загрузке главного меню
+    public void ResetSessionData()
+    {
+        currentScore = 0;
+        money = 0;
+        OnScoreChanged?.Invoke(currentScore);
+        OnMoneyChanged?.Invoke(money);
+    }
+
+    // Вызывается при загрузке игрового уровня
+    public void LoadLevelData()
+    {
+        // Можно загрузить какие-то начальные значения для уровня
+        // или оставить текущие значения, если они уже установлены
     }
 
     public void AddMoney(int amount)
     {
         money += amount;
-        SaveMoney();
         OnMoneyChanged?.Invoke(money);
     }
 
     public void TakeMoney(int amount)
     {
         money = Mathf.Max(0, money - amount);
-        SaveMoney();
         OnMoneyChanged?.Invoke(money);
     }
 
@@ -60,7 +72,6 @@ public class ScoreManager : MonoBehaviour
         currentScore += amount;
         OnScoreChanged?.Invoke(currentScore);
 
-        // Проверяем на новый рекорд
         if (currentScore > highScore)
         {
             highScore = currentScore;
@@ -78,35 +89,52 @@ public class ScoreManager : MonoBehaviour
     public int GetCurrentScore() => currentScore;
     public int GetHighScore() => highScore;
 
-    // Методы сохранения
+    // Сохранение денег в PlayerPrefs (вызывается при завершении уровня)
+    public void SaveMoneyToPlayerPrefs()
+    {
+        int totalMoney = PlayerPrefs.GetInt(MoneyKey, 0);
+        totalMoney += money; // Добавляем текущие деньги к общим
+        PlayerPrefs.SetInt(MoneyKey, totalMoney);
+        PlayerPrefs.Save();
+
+        // Сбрасываем текущие деньги после сохранения
+        money = 0;
+        OnMoneyChanged?.Invoke(money);
+    }
+
+    // Получение общих денег из PlayerPrefs (для магазина)
+    public int GetTotalMoney()
+    {
+        return PlayerPrefs.GetInt(MoneyKey, 0);
+    }
+
+    // Трата денег из PlayerPrefs (в магазине)
+    public void SpendMoney(int amount)
+    {
+        int totalMoney = PlayerPrefs.GetInt(MoneyKey, 0);
+        totalMoney = Mathf.Max(0, totalMoney - amount);
+        PlayerPrefs.SetInt(MoneyKey, totalMoney);
+        PlayerPrefs.Save();
+    }
+
     private void SaveHighScore()
     {
         PlayerPrefs.SetInt(HighScoreKey, highScore);
         PlayerPrefs.Save();
     }
 
-    private void SaveMoney()
-    {
-        PlayerPrefs.SetInt(MoneyKey, money);
-        PlayerPrefs.Save();
-    }
-
-    // Метод для принудительного сохранения всех данных
     public void SaveAllData()
     {
         SaveHighScore();
-        SaveMoney();
     }
 
-    // Метод для сброса всех данных (для тестирования)
     public void ResetAllData()
     {
         currentScore = 0;
         money = 0;
         highScore = 0;
 
-        PlayerPrefs.DeleteKey(HighScoreKey);
-        PlayerPrefs.DeleteKey(MoneyKey);
+        PlayerPrefs.DeleteAll();
         PlayerPrefs.Save();
 
         OnScoreChanged?.Invoke(currentScore);
